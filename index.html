@@ -106,6 +106,7 @@
         .playback-controls {
             display: flex;
             gap: 10px;
+            align-items: center;
         }
 
         .control-btn {
@@ -162,6 +163,27 @@
         .loop-btn:hover {
             background: rgba(156, 39, 176, 0.5);
             box-shadow: 0 5px 15px rgba(156, 39, 176, 0.4);
+        }
+
+        .metronome-indicator {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            border: 3px solid #ffd700;
+            transition: all 0.1s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #ffd700;
+        }
+
+        .metronome-indicator.beat {
+            background: #ffd700;
+            color: #1a1a2e;
+            transform: scale(1.2);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
         }
 
         .tempo-control, .volume-control {
@@ -225,6 +247,77 @@
             width: 18px;
             height: 18px;
             cursor: pointer;
+        }
+
+        .practice-mode {
+            background: rgba(33, 150, 243, 0.1);
+            border: 2px solid #2196F3;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .practice-mode h3 {
+            color: #2196F3;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .practice-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .practice-input {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .practice-input label {
+            font-size: 0.85em;
+            color: #2196F3;
+        }
+
+        .practice-input input {
+            width: 80px;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid #2196F3;
+            border-radius: 5px;
+            color: white;
+            font-size: 1em;
+        }
+
+        .practice-btn {
+            padding: 12px 25px;
+            background: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .practice-btn:hover {
+            background: #1976D2;
+            box-shadow: 0 5px 15px rgba(33, 150, 243, 0.4);
+        }
+
+        .practice-btn.active {
+            background: #FF5722;
+        }
+
+        .practice-progress {
+            flex: 1;
+            min-width: 200px;
+            color: #2196F3;
+            font-weight: bold;
         }
 
         .section-nav {
@@ -373,6 +466,11 @@
                 min-width: 100px;
                 font-size: 0.8em;
             }
+
+            .metronome-indicator {
+                width: 40px;
+                height: 40px;
+            }
         }
     </style>
 </head>
@@ -406,6 +504,8 @@
                 <button class="control-btn loop-btn" id="loopBtn">🔁 Loop</button>
             </div>
 
+            <div id="metronomeIndicator" class="metronome-indicator">♩</div>
+
             <div class="tempo-control">
                 <label class="control-label">Tempo: <span id="tempoValue">120</span> BPM</label>
                 <input type="range" class="slider" id="tempoSlider" min="40" max="200" value="120">
@@ -427,12 +527,36 @@
                 <label for="reverbToggle">Reverb</label>
             </div>
             <div class="audio-option">
+                <input type="checkbox" id="metronomeToggle">
+                <label for="metronomeToggle">Metrónomo</label>
+            </div>
+            <div class="audio-option">
                 <label for="instrumentSelect">Instrumento:</label>
                 <select id="instrumentSelect" style="padding: 5px; background: rgba(255,255,255,0.1); color: white; border: 1px solid #ffd700; border-radius: 5px;">
                     <option value="piano">Piano</option>
                     <option value="strings" selected>Cuerdas</option>
                     <option value="organ">Órgano</option>
                 </select>
+            </div>
+        </div>
+
+        <div class="practice-mode">
+            <h3>🎯 Modo Práctica</h3>
+            <div class="practice-controls">
+                <div class="practice-input">
+                    <label>Tempo Inicial</label>
+                    <input type="number" id="practiceStart" value="60" min="40" max="200">
+                </div>
+                <div class="practice-input">
+                    <label>Tempo Final</label>
+                    <input type="number" id="practiceEnd" value="120" min="40" max="200">
+                </div>
+                <div class="practice-input">
+                    <label>Incremento</label>
+                    <input type="number" id="practiceIncrement" value="5" min="1" max="20">
+                </div>
+                <button class="practice-btn" id="practiceModeBtn">Iniciar Práctica</button>
+                <div class="practice-progress" id="practiceProgress"></div>
             </div>
         </div>
 
@@ -655,7 +779,7 @@
         };
 
         // Audio setup
-        let synth, reverb;
+        let synth, reverb, metronomeClick;
         let currentMovement = 'gigue';
         let isPlaying = false;
         let isPaused = false;
@@ -663,12 +787,22 @@
         let tempo = 120;
         let volume = 70;
         let playbackInterval;
+        let metronomeInterval;
         let loopEnabled = false;
         let loopSection = null;
         let allChords = [];
         let arpeggioEnabled = true;
         let reverbEnabled = true;
         let currentInstrument = 'strings';
+        let metronomeEnabled = false;
+        let currentBeat = 0;
+
+        // Practice mode variables
+        let practiceModeActive = false;
+        let practiceStartTempo = 60;
+        let practiceEndTempo = 120;
+        let practiceIncrement = 5;
+        let practiceCurrentTempo = 60;
 
         // Initialize Tone.js
         async function initAudio() {
@@ -678,6 +812,18 @@
             reverb = new Tone.Reverb({
                 decay: 2.5,
                 wet: 0.3
+            }).toDestination();
+
+            // Create metronome click
+            metronomeClick = new Tone.MembraneSynth({
+                pitchDecay: 0.008,
+                octaves: 2,
+                envelope: {
+                    attack: 0.0006,
+                    decay: 0.5,
+                    sustain: 0
+                },
+                volume: -10
             }).toDestination();
 
             updateSynth();
@@ -730,6 +876,51 @@
             }
         }
 
+        // Play metronome click
+        function playMetronomeClick(isDownbeat) {
+            if (!metronomeEnabled || !metronomeClick) return;
+
+            const pitch = isDownbeat ? 'C5' : 'C4';
+            metronomeClick.triggerAttackRelease(pitch, '8n');
+
+            // Visual feedback
+            const indicator = document.getElementById('metronomeIndicator');
+            indicator.classList.add('beat');
+            indicator.textContent = currentBeat + 1;
+            setTimeout(() => {
+                indicator.classList.remove('beat');
+                indicator.textContent = '♩';
+            }, 100);
+        }
+
+        // Start metronome
+        function startMetronome() {
+            if (metronomeInterval) {
+                clearInterval(metronomeInterval);
+            }
+
+            const movement = movements[currentMovement];
+            const beatDuration = (60 / tempo) * 1000; // milliseconds per beat
+
+            currentBeat = 0;
+
+            metronomeInterval = setInterval(() => {
+                playMetronomeClick(currentBeat === 0);
+                currentBeat = (currentBeat + 1) % movement.beatsPerMeasure;
+            }, beatDuration);
+        }
+
+        // Stop metronome
+        function stopMetronome() {
+            if (metronomeInterval) {
+                clearInterval(metronomeInterval);
+            }
+            currentBeat = 0;
+            const indicator = document.getElementById('metronomeIndicator');
+            indicator.classList.remove('beat');
+            indicator.textContent = '♩';
+        }
+
         // Play a chord with arpeggio option
         function playChord(chordSymbol, measureDuration) {
             if (!synth) return;
@@ -737,13 +928,11 @@
             const notes = chordNotes[chordSymbol] || chordNotes["D-"];
 
             if (arpeggioEnabled) {
-                // Play as arpeggio
                 notes.forEach((note, index) => {
-                    const delay = index * 0.05; // 50ms between notes
+                    const delay = index * 0.05;
                     synth.triggerAttackRelease(note, measureDuration * 0.9, Tone.now() + delay);
                 });
             } else {
-                // Play as block chord
                 synth.triggerAttackRelease(notes, measureDuration * 0.9);
             }
         }
@@ -812,7 +1001,6 @@
                     const measureDuration = beatDuration * movement.beatsPerMeasure;
                     playChord(chordSymbol, measureDuration);
 
-                    // Visual feedback
                     chord.classList.add('playing');
                     setTimeout(() => chord.classList.remove('playing'), 500);
                 });
@@ -824,7 +1012,6 @@
                     e.stopPropagation();
                     const section = btn.dataset.loopSection;
 
-                    // Deactivate other section loop buttons
                     document.querySelectorAll('.section-loop-btn').forEach(b => b.classList.remove('active'));
 
                     if (loopSection === section) {
@@ -834,7 +1021,6 @@
                         btn.classList.add('active');
                     }
 
-                    // Update section nav
                     document.querySelectorAll('.section-nav-btn').forEach(b => b.classList.remove('active'));
                     if (loopSection) {
                         document.querySelector(`[data-section="${loopSection}"]`).classList.add('active');
@@ -862,7 +1048,6 @@
             allChords = [];
 
             if (loopSection) {
-                // Only include chords from the selected section
                 const lines = movement.sections[loopSection];
                 lines.forEach((line, lineIndex) => {
                     line.forEach((chord, chordIndex) => {
@@ -870,7 +1055,6 @@
                     });
                 });
             } else {
-                // Include all chords
                 for (const [section, lines] of Object.entries(movement.sections)) {
                     lines.forEach((line, lineIndex) => {
                         line.forEach((chord, chordIndex) => {
@@ -895,6 +1079,10 @@
 
             updatePlaybackButtons();
 
+            if (metronomeEnabled) {
+                startMetronome();
+            }
+
             const movement = movements[currentMovement];
             const beatDuration = 60 / tempo;
             const measureDuration = beatDuration * movement.beatsPerMeasure;
@@ -902,8 +1090,30 @@
 
             playbackInterval = setInterval(() => {
                 if (currentChordIndex >= allChords.length) {
-                    if (loopEnabled) {
+                    if (loopEnabled || practiceModeActive) {
                         currentChordIndex = 0;
+
+                        // Practice mode: increment tempo
+                        if (practiceModeActive) {
+                            practiceCurrentTempo += practiceIncrement;
+                            if (practiceCurrentTempo > practiceEndTempo) {
+                                practiceCurrentTempo = practiceEndTempo;
+                                practiceModeActive = false;
+                                document.getElementById('practiceModeBtn').classList.remove('active');
+                                document.getElementById('practiceModeBtn').textContent = 'Iniciar Práctica';
+                                updatePracticeProgress('Práctica completada! 🎉');
+                            } else {
+                                tempo = practiceCurrentTempo;
+                                document.getElementById('tempoValue').textContent = tempo;
+                                document.getElementById('tempoSlider').value = tempo;
+                                updatePracticeProgress();
+
+                                // Restart with new tempo
+                                stopPlayback();
+                                playMovement();
+                                return;
+                            }
+                        }
                     } else {
                         stopPlayback();
                         return;
@@ -925,6 +1135,7 @@
             if (playbackInterval) {
                 clearInterval(playbackInterval);
             }
+            stopMetronome();
             updatePlaybackButtons();
         }
 
@@ -935,6 +1146,7 @@
             if (playbackInterval) {
                 clearInterval(playbackInterval);
             }
+            stopMetronome();
             document.querySelectorAll('.chord').forEach(el => el.classList.remove('playing'));
             currentChordIndex = 0;
             updatePlaybackButtons();
@@ -951,6 +1163,50 @@
             } else {
                 playBtn.style.display = 'inline-block';
                 pauseBtn.style.display = 'none';
+            }
+        }
+
+        // Update practice progress
+        function updatePracticeProgress(message = null) {
+            const progress = document.getElementById('practiceProgress');
+            if (message) {
+                progress.textContent = message;
+            } else {
+                progress.textContent = `Tempo actual: ${practiceCurrentTempo} BPM → Objetivo: ${practiceEndTempo} BPM`;
+            }
+        }
+
+        // Toggle practice mode
+        function togglePracticeMode() {
+            if (practiceModeActive) {
+                practiceModeActive = false;
+                document.getElementById('practiceModeBtn').classList.remove('active');
+                document.getElementById('practiceModeBtn').textContent = 'Iniciar Práctica';
+                document.getElementById('practiceProgress').textContent = '';
+            } else {
+                practiceStartTempo = parseInt(document.getElementById('practiceStart').value);
+                practiceEndTempo = parseInt(document.getElementById('practiceEnd').value);
+                practiceIncrement = parseInt(document.getElementById('practiceIncrement').value);
+
+                if (practiceStartTempo >= practiceEndTempo) {
+                    alert('El tempo inicial debe ser menor que el tempo final');
+                    return;
+                }
+
+                practiceModeActive = true;
+                practiceCurrentTempo = practiceStartTempo;
+                tempo = practiceCurrentTempo;
+                document.getElementById('tempoValue').textContent = tempo;
+                document.getElementById('tempoSlider').value = tempo;
+
+                document.getElementById('practiceModeBtn').classList.add('active');
+                document.getElementById('practiceModeBtn').textContent = 'Detener Práctica';
+                updatePracticeProgress();
+
+                // Auto-start playback
+                if (!isPlaying) {
+                    playMovement();
+                }
             }
         }
 
@@ -974,9 +1230,8 @@
             document.getElementById('tempoValue').textContent = tempo;
 
             if (isPlaying) {
-                const wasPlaying = true;
                 stopPlayback();
-                if (wasPlaying) playMovement();
+                playMovement();
             }
         });
 
@@ -999,12 +1254,23 @@
             }
         });
 
+        document.getElementById('metronomeToggle').addEventListener('change', (e) => {
+            metronomeEnabled = e.target.checked;
+            if (metronomeEnabled && isPlaying) {
+                startMetronome();
+            } else {
+                stopMetronome();
+            }
+        });
+
         document.getElementById('instrumentSelect').addEventListener('change', (e) => {
             currentInstrument = e.target.value;
             if (synth) {
                 updateSynth();
             }
         });
+
+        document.getElementById('practiceModeBtn').addEventListener('click', togglePracticeMode);
 
         document.querySelectorAll('.movement-btn').forEach(btn => {
             btn.addEventListener('click', () => {

@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bach - Partita No.2 BWV 1004 - Chord Player</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #e8e8e8;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            font-size: 2.5em;
+            color: #ffd700;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .subtitle {
+            font-size: 1.2em;
+            color: #c0c0c0;
+            font-style: italic;
+        }
+
+        .movement-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .movement-btn {
+            padding: 20px;
+            background: rgba(255, 215, 0, 0.1);
+            border: 2px solid #ffd700;
+            border-radius: 10px;
+            color: #ffd700;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Georgia', serif;
+        }
+
+        .movement-btn:hover {
+            background: rgba(255, 215, 0, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+        }
+
+        .movement-btn.active {
+            background: #ffd700;
+            color: #1a1a2e;
+            font-weight: bold;
+        }
+
+        .movement-info {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        .movement-info h2 {
+            color: #ffd700;
+            margin-bottom: 5px;
+        }
+
+        .chord-display {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        .section {
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            color: #ffd700;
+            font-size: 1.3em;
+            margin-bottom: 10px;
+            padding: 5px 10px;
+            background: rgba(255, 215, 0, 0.1);
+            border-left: 4px solid #ffd700;
+        }
+
+        .chord-line {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 8px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
+        }
+
+        .chord {
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 1em;
+            min-width: 60px;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+
+        .chord.playing {
+            background: #ffd700;
+            color: #1a1a2e;
+            font-weight: bold;
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 30px;
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            padding: 15px 30px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Georgia', serif;
+            font-weight: bold;
+        }
+
+        .play-btn {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .play-btn:hover {
+            background: #45a049;
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+        }
+
+        .stop-btn {
+            background: #f44336;
+            color: white;
+        }
+
+        .stop-btn:hover {
+            background: #da190b;
+            box-shadow: 0 5px 15px rgba(244, 67, 54, 0.4);
+        }
+
+        .tempo-control {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .tempo-slider {
+            width: 200px;
+            height: 8px;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .tempo-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #ffd700;
+            cursor: pointer;
+        }
+
+        .tempo-slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #ffd700;
+            cursor: pointer;
+        }
+
+        .tempo-label {
+            min-width: 150px;
+            color: #ffd700;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .chord-line {
+                gap: 5px;
+            }
+
+            .chord {
+                padding: 6px 8px;
+                font-size: 0.9em;
+                min-width: 50px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Partita No. 2 BWV 1004</h1>
+            <p class="subtitle">Johann Sebastian Bach - Re menor</p>
+        </header>
+
+        <div class="movement-selector">
+            <button class="movement-btn active" data-movement="gigue">
+                Gigue<br><small>(12/8)</small>
+            </button>
+            <button class="movement-btn" data-movement="sarabande">
+                Sarabande<br><small>(3/4)</small>
+            </button>
+            <button class="movement-btn" data-movement="courante">
+                Courante<br><small>(3/4)</small>
+            </button>
+            <button class="movement-btn" data-movement="allemanda">
+                Allemanda<br><small>(4/4)</small>
+            </button>
+        </div>
+
+        <div class="controls">
+            <button class="control-btn play-btn" id="playBtn">▶ Reproducir</button>
+            <button class="control-btn stop-btn" id="stopBtn">■ Detener</button>
+            <div class="tempo-control">
+                <label class="tempo-label">Tempo: <span id="tempoValue">120</span> BPM</label>
+                <input type="range" class="tempo-slider" id="tempoSlider" min="40" max="200" value="120">
+            </div>
+        </div>
+
+        <div class="movement-info">
+            <h2 id="currentMovement">Gigue</h2>
+            <p id="currentTimeSignature">12/8 - Re menor</p>
+        </div>
+
+        <div class="chord-display" id="chordDisplay">
+            <!-- Chords will be rendered here -->
+        </div>
+    </div>
+
+    <script>
+        // Chord progressions data
+        const movements = {
+            gigue: {
+                name: "Gigue",
+                timeSignature: "12/8",
+                beatsPerMeasure: 4,
+                sections: {
+                    A: [
+                        ["D-", "D-", "A7", "A7", "D-", "D-", "G-", "A7"],
+                        ["D-", "D-", "C", "F", "Bb", "A7", "D-", "A7"]
+                    ],
+                    B: [
+                        ["A", "A", "E7", "E7", "A", "A", "F#-", "B-"],
+                        ["E7", "A", "C#7", "F#-", "B-", "E7", "A", "A7"]
+                    ],
+                    C: [
+                        ["D-", "D-", "A7", "A7", "D-", "G-", "C7", "F"],
+                        ["Bb", "Bb", "A7", "A7", "D-", "G-", "A7", "D-"]
+                    ],
+                    D: [
+                        ["D-", "C", "F", "Bb", "G-", "A7", "D-", "D-"],
+                        ["D-", "E7", "A-", "D-", "G-", "A7", "D-", "D-"]
+                    ]
+                }
+            },
+            sarabande: {
+                name: "Sarabande",
+                timeSignature: "3/4",
+                beatsPerMeasure: 3,
+                sections: {
+                    A: [
+                        ["D-", "A7/C#", "D-/F", "G-/Bb", "A7", "D-", "D-", "D-"],
+                        ["F", "C", "D-", "A7", "D-", "D-", "D-", "D-"]
+                    ],
+                    B: [
+                        ["F", "C/E", "D-", "A7/C#", "D-/F", "Bb", "A7", "A7"],
+                        ["D-", "G-", "C7", "F", "Bb", "A7", "D-", "D-"]
+                    ],
+                    C: [
+                        ["D", "A/C#", "B-", "F#7/A#", "B-/D", "E-", "A7", "A7"],
+                        ["D", "A", "F#-", "B-", "E-", "A7", "D", "D"]
+                    ],
+                    D: [
+                        ["D-", "A7/C#", "D-/F", "G-/Bb", "A7", "D-", "D-", "C#o7"],
+                        ["D-/F", "G-", "C7", "F", "Bb", "A7", "D-", "D-"]
+                    ]
+                }
+            },
+            courante: {
+                name: "Courante",
+                timeSignature: "3/4",
+                beatsPerMeasure: 3,
+                sections: {
+                    A: [
+                        ["D-", "A7", "D-", "G-", "C", "F", "Bb", "A7"],
+                        ["D-", "A7", "D-", "E7", "A", "E7", "A", "A7"]
+                    ],
+                    B: [
+                        ["D-", "A7", "D-/F", "G-", "A7", "D-", "G-", "C7"],
+                        ["F", "C", "F", "Bb", "G-", "A7", "D-", "D-"]
+                    ],
+                    C: [
+                        ["D-", "C7", "F", "Bb", "A7", "D-", "G-", "A7"],
+                        ["D-", "A7/C#", "D-/F", "G-", "C7", "F", "Bb", "A7"]
+                    ],
+                    D: [
+                        ["D-", "G-", "C", "F", "Bb", "E7", "A-", "A"],
+                        ["D-", "A7", "D-", "Bb", "G-", "A7", "D-", "D-"]
+                    ]
+                }
+            },
+            allemanda: {
+                name: "Allemanda",
+                timeSignature: "4/4",
+                beatsPerMeasure: 4,
+                sections: {
+                    A: [
+                        ["D-", "A7", "D-", "A7/C#", "D-", "D-7/F", "G-", "A7"],
+                        ["D-", "C", "F", "Bb/F", "G-", "C7", "F", "A7"]
+                    ],
+                    B: [
+                        ["D-", "A7/C#", "D-/F", "G-", "A/E", "E7", "A", "A/C#"],
+                        ["B-/D", "E7", "A", "C#7/A", "F#-", "B-", "E7", "A7"]
+                    ],
+                    C: [
+                        ["D-", "A7", "D-", "Bb", "G-", "C7", "F", "A7/C#"],
+                        ["Bb", "A7", "D-", "E7", "A-", "F", "G-", "A7"]
+                    ],
+                    D: [
+                        ["D-", "A7/C#", "D-/F", "G-", "C7", "F", "Bb", "A7"],
+                        ["D-", "G-", "C7", "F", "G-", "A7", "D-", "D-"]
+                    ]
+                }
+            }
+        };
+
+        // Chord to notes mapping (simplified voicings)
+        const chordNotes = {
+            "D-": ["D3", "F3", "A3", "D4"],
+            "A7": ["A2", "E3", "G3", "C#4"],
+            "G-": ["G3", "Bb3", "D4"],
+            "C": ["C3", "E3", "G3", "C4"],
+            "F": ["F3", "A3", "C4"],
+            "Bb": ["Bb2", "D3", "F3", "Bb3"],
+            "A": ["A2", "C#3", "E3", "A3"],
+            "E7": ["E2", "G#3", "B3", "D4"],
+            "F#-": ["F#3", "A3", "C#4"],
+            "B-": ["B2", "D3", "F#3"],
+            "C#7": ["C#3", "F3", "G#3", "B3"],
+            "C7": ["C3", "E3", "G3", "Bb3"],
+            "A7/C#": ["C#3", "E3", "G3", "A3"],
+            "D-/F": ["F3", "A3", "D4"],
+            "G-/Bb": ["Bb2", "D3", "G3"],
+            "C/E": ["E3", "G3", "C4"],
+            "A/C#": ["C#3", "E3", "A3"],
+            "B-": ["B2", "D3", "F#3"],
+            "F#7/A#": ["A#2", "C#3", "E3", "F#3"],
+            "B-/D": ["D3", "F#3", "B3"],
+            "E-": ["E3", "G3", "B3"],
+            "C#o7": ["C#3", "E3", "G3", "Bb3"],
+            "D": ["D3", "F#3", "A3", "D4"],
+            "A/E": ["E3", "A3", "C#4"],
+            "C#7/A": ["A2", "C#3", "F3", "G#3"],
+            "A-": ["A2", "C3", "E3"],
+            "D-7/F": ["F3", "A3", "C4"],
+            "Bb/F": ["F3", "Bb3", "D4"],
+            "D-/F": ["F3", "A3", "D4"]
+        };
+
+        // Audio setup
+        let synth;
+        let currentMovement = 'gigue';
+        let isPlaying = false;
+        let currentChordIndex = 0;
+        let tempo = 120;
+        let playbackInterval;
+
+        // Initialize Tone.js
+        async function initAudio() {
+            await Tone.start();
+            synth = new Tone.PolySynth(Tone.Synth, {
+                envelope: {
+                    attack: 0.02,
+                    decay: 0.3,
+                    sustain: 0.4,
+                    release: 1.2
+                },
+                volume: -8
+            }).toDestination();
+        }
+
+        // Play a chord
+        function playChord(chordSymbol, measureDuration) {
+            if (!synth) return;
+
+            const notes = chordNotes[chordSymbol] || chordNotes["D-"];
+
+            synth.triggerAttackRelease(notes, measureDuration * 0.9);
+        }
+
+        // Render chord display
+        function renderChords() {
+            const display = document.getElementById('chordDisplay');
+            const movement = movements[currentMovement];
+
+            let html = '';
+            for (const [section, lines] of Object.entries(movement.sections)) {
+                html += `<div class="section">`;
+                html += `<div class="section-title">Sección ${section}</div>`;
+
+                lines.forEach((line, lineIndex) => {
+                    html += `<div class="chord-line">`;
+                    line.forEach((chord, chordIndex) => {
+                        html += `<div class="chord" data-section="${section}" data-line="${lineIndex}" data-chord="${chordIndex}">${chord}</div>`;
+                    });
+                    html += `</div>`;
+                });
+
+                html += `</div>`;
+            }
+
+            display.innerHTML = html;
+        }
+
+        // Highlight current chord
+        function highlightChord(section, line, chord) {
+            document.querySelectorAll('.chord').forEach(el => el.classList.remove('playing'));
+            const selector = `[data-section="${section}"][data-line="${line}"][data-chord="${chord}"]`;
+            const element = document.querySelector(selector);
+            if (element) {
+                element.classList.add('playing');
+                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        // Play movement
+        function playMovement() {
+            if (isPlaying) return;
+
+            isPlaying = true;
+            currentChordIndex = 0;
+
+            const movement = movements[currentMovement];
+            const allChords = [];
+
+            // Flatten all chords with their positions
+            for (const [section, lines] of Object.entries(movement.sections)) {
+                lines.forEach((line, lineIndex) => {
+                    line.forEach((chord, chordIndex) => {
+                        allChords.push({ chord, section, line: lineIndex, chordIndex });
+                    });
+                });
+            }
+
+            const beatDuration = 60 / tempo; // seconds per beat
+            const measureDuration = beatDuration * movement.beatsPerMeasure; // seconds per measure
+            const measureDurationMs = measureDuration * 1000; // milliseconds per measure
+
+            playbackInterval = setInterval(() => {
+                if (currentChordIndex >= allChords.length) {
+                    stopPlayback();
+                    return;
+                }
+
+                const current = allChords[currentChordIndex];
+                playChord(current.chord, measureDuration);
+                highlightChord(current.section, current.line, current.chordIndex);
+
+                currentChordIndex++;
+            }, measureDurationMs);
+        }
+
+        // Stop playback
+        function stopPlayback() {
+            isPlaying = false;
+            if (playbackInterval) {
+                clearInterval(playbackInterval);
+            }
+            document.querySelectorAll('.chord').forEach(el => el.classList.remove('playing'));
+            currentChordIndex = 0;
+        }
+
+        // Event listeners
+        document.getElementById('playBtn').addEventListener('click', async () => {
+            if (!synth) await initAudio();
+            playMovement();
+        });
+
+        document.getElementById('stopBtn').addEventListener('click', stopPlayback);
+
+        document.getElementById('tempoSlider').addEventListener('input', (e) => {
+            tempo = parseInt(e.target.value);
+            document.getElementById('tempoValue').textContent = tempo;
+
+            if (isPlaying) {
+                stopPlayback();
+                playMovement();
+            }
+        });
+
+        document.querySelectorAll('.movement-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                stopPlayback();
+
+                document.querySelectorAll('.movement-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                currentMovement = btn.dataset.movement;
+                const movement = movements[currentMovement];
+
+                document.getElementById('currentMovement').textContent = movement.name;
+                document.getElementById('currentTimeSignature').textContent = `${movement.timeSignature} - Re menor`;
+
+                renderChords();
+            });
+        });
+
+        // Initialize
+        renderChords();
+    </script>
+</body>
+</html>

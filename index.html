@@ -91,66 +91,21 @@
             margin-bottom: 5px;
         }
 
-        .chord-display {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 15px;
-            padding: 30px;
-            margin-bottom: 30px;
-            backdrop-filter: blur(10px);
-        }
-
-        .section {
-            margin-bottom: 25px;
-        }
-
-        .section-title {
-            color: #ffd700;
-            font-size: 1.3em;
-            margin-bottom: 10px;
-            padding: 5px 10px;
-            background: rgba(255, 215, 0, 0.1);
-            border-left: 4px solid #ffd700;
-        }
-
-        .chord-line {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-bottom: 8px;
-            padding: 10px;
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 5px;
-        }
-
-        .chord {
-            padding: 8px 12px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 5px;
-            font-family: 'Courier New', monospace;
-            font-size: 1em;
-            min-width: 60px;
-            text-align: center;
-            transition: all 0.2s ease;
-        }
-
-        .chord.playing {
-            background: #ffd700;
-            color: #1a1a2e;
-            font-weight: bold;
-            transform: scale(1.1);
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
-        }
-
         .controls {
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 20px;
+            gap: 15px;
             margin-bottom: 30px;
             padding: 25px;
             background: rgba(255, 255, 255, 0.05);
             border-radius: 15px;
             flex-wrap: wrap;
+        }
+
+        .playback-controls {
+            display: flex;
+            gap: 10px;
         }
 
         .control-btn {
@@ -174,6 +129,16 @@
             box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
         }
 
+        .pause-btn {
+            background: #FF9800;
+            color: white;
+        }
+
+        .pause-btn:hover {
+            background: #F57C00;
+            box-shadow: 0 5px 15px rgba(255, 152, 0, 0.4);
+        }
+
         .stop-btn {
             background: #f44336;
             color: white;
@@ -184,14 +149,29 @@
             box-shadow: 0 5px 15px rgba(244, 67, 54, 0.4);
         }
 
-        .tempo-control {
+        .loop-btn {
+            background: rgba(156, 39, 176, 0.3);
+            color: white;
+            border: 2px solid #9C27B0;
+        }
+
+        .loop-btn.active {
+            background: #9C27B0;
+        }
+
+        .loop-btn:hover {
+            background: rgba(156, 39, 176, 0.5);
+            box-shadow: 0 5px 15px rgba(156, 39, 176, 0.4);
+        }
+
+        .tempo-control, .volume-control {
             display: flex;
             align-items: center;
             gap: 15px;
         }
 
-        .tempo-slider {
-            width: 200px;
+        .slider {
+            width: 150px;
             height: 8px;
             border-radius: 5px;
             background: rgba(255, 255, 255, 0.2);
@@ -199,7 +179,7 @@
             -webkit-appearance: none;
         }
 
-        .tempo-slider::-webkit-slider-thumb {
+        .slider::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
             width: 20px;
@@ -209,7 +189,7 @@
             cursor: pointer;
         }
 
-        .tempo-slider::-moz-range-thumb {
+        .slider::-moz-range-thumb {
             width: 20px;
             height: 20px;
             border-radius: 50%;
@@ -217,14 +197,166 @@
             cursor: pointer;
         }
 
-        .tempo-label {
-            min-width: 150px;
+        .control-label {
+            min-width: 120px;
             color: #ffd700;
+            font-size: 0.9em;
+        }
+
+        .audio-settings {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .audio-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .audio-option label {
+            color: #c0c0c0;
+            font-size: 0.9em;
+        }
+
+        .audio-option input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .section-nav {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .section-nav-btn {
+            padding: 10px 20px;
+            background: rgba(33, 150, 243, 0.2);
+            border: 2px solid #2196F3;
+            border-radius: 8px;
+            color: #2196F3;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Georgia', serif;
+            font-weight: bold;
+        }
+
+        .section-nav-btn:hover {
+            background: rgba(33, 150, 243, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .section-nav-btn.active {
+            background: #2196F3;
+            color: white;
+        }
+
+        .chord-display {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        .section {
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            color: #ffd700;
+            font-size: 1.3em;
+            margin-bottom: 10px;
+            padding: 5px 10px;
+            background: rgba(255, 215, 0, 0.1);
+            border-left: 4px solid #ffd700;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .section-loop-btn {
+            font-size: 0.8em;
+            padding: 5px 15px;
+            background: rgba(156, 39, 176, 0.3);
+            color: white;
+            border: 1px solid #9C27B0;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .section-loop-btn:hover,
+        .section-loop-btn.active {
+            background: #9C27B0;
+        }
+
+        .chord-line {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 8px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
+        }
+
+        .chord-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .chord {
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 1em;
+            min-width: 60px;
+            text-align: center;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .chord:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .chord.playing {
+            background: #ffd700;
+            color: #1a1a2e;
+            font-weight: bold;
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+        }
+
+        .roman-numeral {
+            font-size: 0.75em;
+            color: #9C27B0;
+            font-weight: bold;
+            font-family: 'Georgia', serif;
         }
 
         @media (max-width: 768px) {
             h1 {
                 font-size: 1.8em;
+            }
+
+            .controls {
+                gap: 10px;
+            }
+
+            .slider {
+                width: 100px;
             }
 
             .chord-line {
@@ -235,6 +367,11 @@
                 padding: 6px 8px;
                 font-size: 0.9em;
                 min-width: 50px;
+            }
+
+            .control-label {
+                min-width: 100px;
+                font-size: 0.8em;
             }
         }
     </style>
@@ -262,12 +399,45 @@
         </div>
 
         <div class="controls">
-            <button class="control-btn play-btn" id="playBtn">▶ Reproducir</button>
-            <button class="control-btn stop-btn" id="stopBtn">■ Detener</button>
-            <div class="tempo-control">
-                <label class="tempo-label">Tempo: <span id="tempoValue">120</span> BPM</label>
-                <input type="range" class="tempo-slider" id="tempoSlider" min="40" max="200" value="120">
+            <div class="playback-controls">
+                <button class="control-btn play-btn" id="playBtn">▶ Play</button>
+                <button class="control-btn pause-btn" id="pauseBtn" style="display: none;">⏸ Pausa</button>
+                <button class="control-btn stop-btn" id="stopBtn">■ Stop</button>
+                <button class="control-btn loop-btn" id="loopBtn">🔁 Loop</button>
             </div>
+
+            <div class="tempo-control">
+                <label class="control-label">Tempo: <span id="tempoValue">120</span> BPM</label>
+                <input type="range" class="slider" id="tempoSlider" min="40" max="200" value="120">
+            </div>
+
+            <div class="volume-control">
+                <label class="control-label">Volumen: <span id="volumeValue">70</span>%</label>
+                <input type="range" class="slider" id="volumeSlider" min="0" max="100" value="70">
+            </div>
+        </div>
+
+        <div class="controls audio-settings">
+            <div class="audio-option">
+                <input type="checkbox" id="arpeggioToggle" checked>
+                <label for="arpeggioToggle">Arpegios</label>
+            </div>
+            <div class="audio-option">
+                <input type="checkbox" id="reverbToggle" checked>
+                <label for="reverbToggle">Reverb</label>
+            </div>
+            <div class="audio-option">
+                <label for="instrumentSelect">Instrumento:</label>
+                <select id="instrumentSelect" style="padding: 5px; background: rgba(255,255,255,0.1); color: white; border: 1px solid #ffd700; border-radius: 5px;">
+                    <option value="piano">Piano</option>
+                    <option value="strings" selected>Cuerdas</option>
+                    <option value="organ">Órgano</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="section-nav" id="sectionNav">
+            <!-- Section navigation buttons will be rendered here -->
         </div>
 
         <div class="movement-info">
@@ -281,6 +451,82 @@
     </div>
 
     <script>
+        // Roman numeral analysis for each movement
+        const romanNumerals = {
+            gigue: {
+                A: [
+                    ["i", "i", "V7", "V7", "i", "i", "iv", "V7"],
+                    ["i", "i", "VII", "III", "VI", "V7", "i", "V7"]
+                ],
+                B: [
+                    ["V", "V", "V/V", "V/V", "V", "V", "vi", "ii"],
+                    ["V/V", "V", "V7/vi", "vi", "ii", "V/V", "V", "V7"]
+                ],
+                C: [
+                    ["i", "i", "V7", "V7", "i", "iv", "VII/III", "III"],
+                    ["VI", "VI", "V7", "V7", "i", "iv", "V7", "i"]
+                ],
+                D: [
+                    ["i", "VII", "III", "VI", "iv", "V7", "i", "i"],
+                    ["i", "V7/v", "v", "i", "iv", "V7", "i", "i"]
+                ]
+            },
+            sarabande: {
+                A: [
+                    ["i", "V7", "i", "iv", "V7", "i", "i", "i"],
+                    ["III", "VII", "i", "V7", "i", "i", "i", "i"]
+                ],
+                B: [
+                    ["III", "VII", "i", "V7", "i", "VI", "V7", "V7"],
+                    ["i", "iv", "VII/III", "III", "VI", "V7", "i", "i"]
+                ],
+                C: [
+                    ["I", "V", "vi", "V7/vi", "vi", "ii", "V7", "V7"],
+                    ["I", "V", "vi", "vi", "ii", "V7", "I", "I"]
+                ],
+                D: [
+                    ["i", "V7", "i", "iv", "V7", "i", "i", "viio7"],
+                    ["i", "iv", "VII/III", "III", "VI", "V7", "i", "i"]
+                ]
+            },
+            courante: {
+                A: [
+                    ["i", "V7", "i", "iv", "VII", "III", "VI", "V7"],
+                    ["i", "V7", "i", "V7/v", "v", "V7/v", "v", "V7"]
+                ],
+                B: [
+                    ["i", "V7", "i", "iv", "V7", "i", "iv", "VII/III"],
+                    ["III", "VII", "III", "VI", "iv", "V7", "i", "i"]
+                ],
+                C: [
+                    ["i", "VII/III", "III", "VI", "V7", "i", "iv", "V7"],
+                    ["i", "V7", "i", "iv", "VII/III", "III", "VI", "V7"]
+                ],
+                D: [
+                    ["i", "iv", "VII", "III", "VI", "V7/v", "v", "v"],
+                    ["i", "V7", "i", "VI", "iv", "V7", "i", "i"]
+                ]
+            },
+            allemanda: {
+                A: [
+                    ["i", "V7", "i", "V7", "i", "i7", "iv", "V7"],
+                    ["i", "VII", "III", "VI", "iv", "VII/III", "III", "V7"]
+                ],
+                B: [
+                    ["i", "V7", "i", "iv", "V", "V7/V", "V", "V"],
+                    ["vi", "V7/V", "V", "V7/vi", "vi", "ii", "V7/V", "V7"]
+                ],
+                C: [
+                    ["i", "V7", "i", "VI", "iv", "VII/III", "III", "V7"],
+                    ["VI", "V7", "i", "V7/v", "v", "III", "iv", "V7"]
+                ],
+                D: [
+                    ["i", "V7", "i", "iv", "VII/III", "III", "VI", "V7"],
+                    ["i", "iv", "VII/III", "III", "iv", "V7", "i", "i"]
+                ]
+            }
+        };
+
         // Chord progressions data
         const movements = {
             gigue: {
@@ -377,7 +623,7 @@
             }
         };
 
-        // Chord to notes mapping (simplified voicings)
+        // Chord to notes mapping
         const chordNotes = {
             "D-": ["D3", "F3", "A3", "D4"],
             "A7": ["A2", "E3", "G3", "C#4"],
@@ -396,7 +642,6 @@
             "G-/Bb": ["Bb2", "D3", "G3"],
             "C/E": ["E3", "G3", "C4"],
             "A/C#": ["C#3", "E3", "A3"],
-            "B-": ["B2", "D3", "F#3"],
             "F#7/A#": ["A#2", "C#3", "E3", "F#3"],
             "B-/D": ["D3", "F#3", "B3"],
             "E-": ["E3", "G3", "B3"],
@@ -406,55 +651,148 @@
             "C#7/A": ["A2", "C#3", "F3", "G#3"],
             "A-": ["A2", "C3", "E3"],
             "D-7/F": ["F3", "A3", "C4"],
-            "Bb/F": ["F3", "Bb3", "D4"],
-            "D-/F": ["F3", "A3", "D4"]
+            "Bb/F": ["F3", "Bb3", "D4"]
         };
 
         // Audio setup
-        let synth;
+        let synth, reverb;
         let currentMovement = 'gigue';
         let isPlaying = false;
+        let isPaused = false;
         let currentChordIndex = 0;
         let tempo = 120;
+        let volume = 70;
         let playbackInterval;
+        let loopEnabled = false;
+        let loopSection = null;
+        let allChords = [];
+        let arpeggioEnabled = true;
+        let reverbEnabled = true;
+        let currentInstrument = 'strings';
 
         // Initialize Tone.js
         async function initAudio() {
             await Tone.start();
-            synth = new Tone.PolySynth(Tone.Synth, {
-                envelope: {
-                    attack: 0.02,
-                    decay: 0.3,
-                    sustain: 0.4,
-                    release: 1.2
-                },
-                volume: -8
+
+            // Create reverb
+            reverb = new Tone.Reverb({
+                decay: 2.5,
+                wet: 0.3
             }).toDestination();
+
+            updateSynth();
         }
 
-        // Play a chord
+        function updateSynth() {
+            if (synth) {
+                synth.disconnect();
+                synth.dispose();
+            }
+
+            const baseVolume = (volume / 100) * 10 - 15;
+
+            const synthParams = {
+                piano: {
+                    envelope: {
+                        attack: 0.005,
+                        decay: 0.3,
+                        sustain: 0.2,
+                        release: 1.5
+                    },
+                    volume: baseVolume
+                },
+                strings: {
+                    envelope: {
+                        attack: 0.1,
+                        decay: 0.3,
+                        sustain: 0.7,
+                        release: 2.0
+                    },
+                    volume: baseVolume
+                },
+                organ: {
+                    envelope: {
+                        attack: 0.02,
+                        decay: 0.1,
+                        sustain: 0.9,
+                        release: 0.5
+                    },
+                    volume: baseVolume
+                }
+            };
+
+            synth = new Tone.PolySynth(Tone.Synth, synthParams[currentInstrument]);
+
+            if (reverbEnabled) {
+                synth.connect(reverb);
+            } else {
+                synth.toDestination();
+            }
+        }
+
+        // Play a chord with arpeggio option
         function playChord(chordSymbol, measureDuration) {
             if (!synth) return;
 
             const notes = chordNotes[chordSymbol] || chordNotes["D-"];
 
-            synth.triggerAttackRelease(notes, measureDuration * 0.9);
+            if (arpeggioEnabled) {
+                // Play as arpeggio
+                notes.forEach((note, index) => {
+                    const delay = index * 0.05; // 50ms between notes
+                    synth.triggerAttackRelease(note, measureDuration * 0.9, Tone.now() + delay);
+                });
+            } else {
+                // Play as block chord
+                synth.triggerAttackRelease(notes, measureDuration * 0.9);
+            }
+        }
+
+        // Render section navigation
+        function renderSectionNav() {
+            const nav = document.getElementById('sectionNav');
+            const movement = movements[currentMovement];
+
+            let html = '<button class="section-nav-btn active" data-section="all">Todas</button>';
+            for (const section of Object.keys(movement.sections)) {
+                html += `<button class="section-nav-btn" data-section="${section}">Sección ${section}</button>`;
+            }
+
+            nav.innerHTML = html;
+
+            document.querySelectorAll('.section-nav-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.section-nav-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+
+                    const section = btn.dataset.section;
+                    loopSection = section === 'all' ? null : section;
+                });
+            });
         }
 
         // Render chord display
         function renderChords() {
             const display = document.getElementById('chordDisplay');
             const movement = movements[currentMovement];
+            const romansForMovement = romanNumerals[currentMovement];
 
             let html = '';
             for (const [section, lines] of Object.entries(movement.sections)) {
-                html += `<div class="section">`;
-                html += `<div class="section-title">Sección ${section}</div>`;
+                html += `<div class="section" data-section="${section}">`;
+                html += `<div class="section-title">
+                    Sección ${section}
+                    <button class="section-loop-btn" data-loop-section="${section}">🔁 Loop ${section}</button>
+                </div>`;
 
                 lines.forEach((line, lineIndex) => {
                     html += `<div class="chord-line">`;
                     line.forEach((chord, chordIndex) => {
-                        html += `<div class="chord" data-section="${section}" data-line="${lineIndex}" data-chord="${chordIndex}">${chord}</div>`;
+                        const roman = romansForMovement[section][lineIndex][chordIndex];
+                        html += `<div class="chord-container">
+                            <div class="chord" data-section="${section}" data-line="${lineIndex}" data-chord="${chordIndex}">${chord}</div>
+                            <div class="roman-numeral">${roman}</div>
+                        </div>`;
                     });
                     html += `</div>`;
                 });
@@ -463,6 +801,48 @@
             }
 
             display.innerHTML = html;
+
+            // Add click listeners to chords
+            document.querySelectorAll('.chord').forEach(chord => {
+                chord.addEventListener('click', async () => {
+                    if (!synth) await initAudio();
+                    const chordSymbol = chord.textContent;
+                    const movement = movements[currentMovement];
+                    const beatDuration = 60 / tempo;
+                    const measureDuration = beatDuration * movement.beatsPerMeasure;
+                    playChord(chordSymbol, measureDuration);
+
+                    // Visual feedback
+                    chord.classList.add('playing');
+                    setTimeout(() => chord.classList.remove('playing'), 500);
+                });
+            });
+
+            // Add click listeners to section loop buttons
+            document.querySelectorAll('.section-loop-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const section = btn.dataset.loopSection;
+
+                    // Deactivate other section loop buttons
+                    document.querySelectorAll('.section-loop-btn').forEach(b => b.classList.remove('active'));
+
+                    if (loopSection === section) {
+                        loopSection = null;
+                    } else {
+                        loopSection = section;
+                        btn.classList.add('active');
+                    }
+
+                    // Update section nav
+                    document.querySelectorAll('.section-nav-btn').forEach(b => b.classList.remove('active'));
+                    if (loopSection) {
+                        document.querySelector(`[data-section="${loopSection}"]`).classList.add('active');
+                    } else {
+                        document.querySelector('[data-section="all"]').classList.add('active');
+                    }
+                });
+            });
         }
 
         // Highlight current chord
@@ -476,33 +856,58 @@
             }
         }
 
-        // Play movement
-        function playMovement() {
-            if (isPlaying) return;
-
-            isPlaying = true;
-            currentChordIndex = 0;
-
+        // Build chord list for playback
+        function buildChordList() {
             const movement = movements[currentMovement];
-            const allChords = [];
+            allChords = [];
 
-            // Flatten all chords with their positions
-            for (const [section, lines] of Object.entries(movement.sections)) {
+            if (loopSection) {
+                // Only include chords from the selected section
+                const lines = movement.sections[loopSection];
                 lines.forEach((line, lineIndex) => {
                     line.forEach((chord, chordIndex) => {
-                        allChords.push({ chord, section, line: lineIndex, chordIndex });
+                        allChords.push({ chord, section: loopSection, line: lineIndex, chordIndex });
                     });
                 });
+            } else {
+                // Include all chords
+                for (const [section, lines] of Object.entries(movement.sections)) {
+                    lines.forEach((line, lineIndex) => {
+                        line.forEach((chord, chordIndex) => {
+                            allChords.push({ chord, section, line: lineIndex, chordIndex });
+                        });
+                    });
+                }
+            }
+        }
+
+        // Play movement
+        function playMovement() {
+            if (isPlaying && !isPaused) return;
+
+            if (!isPaused) {
+                buildChordList();
+                currentChordIndex = 0;
             }
 
-            const beatDuration = 60 / tempo; // seconds per beat
-            const measureDuration = beatDuration * movement.beatsPerMeasure; // seconds per measure
-            const measureDurationMs = measureDuration * 1000; // milliseconds per measure
+            isPlaying = true;
+            isPaused = false;
+
+            updatePlaybackButtons();
+
+            const movement = movements[currentMovement];
+            const beatDuration = 60 / tempo;
+            const measureDuration = beatDuration * movement.beatsPerMeasure;
+            const measureDurationMs = measureDuration * 1000;
 
             playbackInterval = setInterval(() => {
                 if (currentChordIndex >= allChords.length) {
-                    stopPlayback();
-                    return;
+                    if (loopEnabled) {
+                        currentChordIndex = 0;
+                    } else {
+                        stopPlayback();
+                        return;
+                    }
                 }
 
                 const current = allChords[currentChordIndex];
@@ -513,14 +918,40 @@
             }, measureDurationMs);
         }
 
+        // Pause playback
+        function pausePlayback() {
+            isPaused = true;
+            isPlaying = false;
+            if (playbackInterval) {
+                clearInterval(playbackInterval);
+            }
+            updatePlaybackButtons();
+        }
+
         // Stop playback
         function stopPlayback() {
             isPlaying = false;
+            isPaused = false;
             if (playbackInterval) {
                 clearInterval(playbackInterval);
             }
             document.querySelectorAll('.chord').forEach(el => el.classList.remove('playing'));
             currentChordIndex = 0;
+            updatePlaybackButtons();
+        }
+
+        // Update playback button visibility
+        function updatePlaybackButtons() {
+            const playBtn = document.getElementById('playBtn');
+            const pauseBtn = document.getElementById('pauseBtn');
+
+            if (isPlaying) {
+                playBtn.style.display = 'none';
+                pauseBtn.style.display = 'inline-block';
+            } else {
+                playBtn.style.display = 'inline-block';
+                pauseBtn.style.display = 'none';
+            }
         }
 
         // Event listeners
@@ -529,15 +960,49 @@
             playMovement();
         });
 
+        document.getElementById('pauseBtn').addEventListener('click', pausePlayback);
+
         document.getElementById('stopBtn').addEventListener('click', stopPlayback);
+
+        document.getElementById('loopBtn').addEventListener('click', () => {
+            loopEnabled = !loopEnabled;
+            document.getElementById('loopBtn').classList.toggle('active');
+        });
 
         document.getElementById('tempoSlider').addEventListener('input', (e) => {
             tempo = parseInt(e.target.value);
             document.getElementById('tempoValue').textContent = tempo;
 
             if (isPlaying) {
+                const wasPlaying = true;
                 stopPlayback();
-                playMovement();
+                if (wasPlaying) playMovement();
+            }
+        });
+
+        document.getElementById('volumeSlider').addEventListener('input', (e) => {
+            volume = parseInt(e.target.value);
+            document.getElementById('volumeValue').textContent = volume;
+            if (synth) {
+                updateSynth();
+            }
+        });
+
+        document.getElementById('arpeggioToggle').addEventListener('change', (e) => {
+            arpeggioEnabled = e.target.checked;
+        });
+
+        document.getElementById('reverbToggle').addEventListener('change', (e) => {
+            reverbEnabled = e.target.checked;
+            if (synth) {
+                updateSynth();
+            }
+        });
+
+        document.getElementById('instrumentSelect').addEventListener('change', (e) => {
+            currentInstrument = e.target.value;
+            if (synth) {
+                updateSynth();
             }
         });
 
@@ -554,11 +1019,14 @@
                 document.getElementById('currentMovement').textContent = movement.name;
                 document.getElementById('currentTimeSignature').textContent = `${movement.timeSignature} - Re menor`;
 
+                renderSectionNav();
                 renderChords();
+                loopSection = null;
             });
         });
 
         // Initialize
+        renderSectionNav();
         renderChords();
     </script>
 </body>
